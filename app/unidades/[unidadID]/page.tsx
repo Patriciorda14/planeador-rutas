@@ -19,6 +19,7 @@ const ZONAS: Record<string, { label: string; color: string; icon: string }> = {
   refrigerado: { label: 'Refrigerado', color: '#34d399', icon: '🌡' },
   ambiente:    { label: 'Ambiente',    color: '#fbbf24', icon: '☀' },
 }
+
 const ESTATUS_RUTA: Record<string, { label: string; color: string }> = {
   en_creacion: { label: 'En creación', color: '#94a3b8' },
   liberada:    { label: 'Liberada',    color: '#60a5fa' },
@@ -35,7 +36,9 @@ export default function DetalleUnidadPage() {
   const [rutas,   setRutas]   = useState<Ruta[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => { if (unidadId) fetchData() }, [unidadId])
+  useEffect(() => {
+    if (unidadId) fetchData()
+  }, [unidadId])
 
   async function fetchData() {
     setLoading(true)
@@ -51,8 +54,17 @@ export default function DetalleUnidadPage() {
     setLoading(false)
   }
 
-  if (loading) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#64748b' }}>Cargando...</div>
-  if (!unidad) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#64748b' }}>Unidad no encontrada</div>
+  if (loading) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#64748b' }}>
+      Cargando...
+    </div>
+  )
+
+  if (!unidad) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#64748b' }}>
+      Unidad no encontrada
+    </div>
+  )
 
   const kmTotales = rutas.reduce((s, r) => s + (r.km_estimados || 0), 0)
   const m3Equiv   = unidad.capacidad_tarimas ? (unidad.capacidad_tarimas * 1.92).toFixed(1) : '—'
@@ -75,16 +87,15 @@ export default function DetalleUnidadPage() {
       <div style={{ padding: '20px 24px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 18 }}>
 
-          {/* Info */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div style={{ background: '#131620', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: 18 }}>
               <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, color: '#e2e8f0', marginBottom: 14, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>Especificaciones</div>
               {[
-                ['Placa',      unidad.placa],
-                ['Tipo',       unidad.tipo],
-                ['Cap. kg',    unidad.capacidad_kg ? `${unidad.capacidad_kg.toLocaleString('es-MX')} kg` : '—'],
-                ['Tarimas',    unidad.capacidad_tarimas ? `${unidad.capacidad_tarimas} tarimas` : '—'],
-                ['M³ equiv.',  `${m3Equiv} m³`],
+                ['Placa',     unidad.placa],
+                ['Tipo',      unidad.tipo],
+                ['Cap. kg',   unidad.capacidad_kg ? `${unidad.capacidad_kg.toLocaleString('es-MX')} kg` : '—'],
+                ['Tarimas',   unidad.capacidad_tarimas ? `${unidad.capacidad_tarimas} tarimas` : '—'],
+                ['M³ equiv.', `${m3Equiv} m³`],
               ].map(([k, v]) => (
                 <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', fontSize: 12 }}>
                   <span style={{ color: '#64748b' }}>{k}</span>
@@ -94,7 +105,7 @@ export default function DetalleUnidadPage() {
               <div style={{ marginTop: 12 }}>
                 <div style={{ fontSize: 10, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 8 }}>Zonas de temperatura</div>
                 <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-                  {(unidad.zonas_temp || []).map(z => (
+                  {(unidad.zonas_temp || []).map((z: string) => (
                     <span key={z} style={{ fontSize: 11, padding: '3px 9px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', color: ZONAS[z]?.color || '#94a3b8' }}>
                       {ZONAS[z]?.icon} {ZONAS[z]?.label || z}
                     </span>
@@ -105,10 +116,10 @@ export default function DetalleUnidadPage() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {[
-                { label: 'Total rutas',  value: rutas.length,                                                                        color: '#e2e8f0' },
-                { label: 'Km totales',   value: kmTotales.toLocaleString('es-MX'),                                                  color: '#818cf8' },
-                { label: 'Completadas',  value: rutas.filter(r => r.estatus === 'entregada' || r.estatus === 'cerrada').length,      color: '#34d399' },
-                { label: 'En tránsito',  value: rutas.filter(r => r.estatus === 'en_transito' || r.estatus === 'embarcada').length,  color: '#fbbf24' },
+                { label: 'Total rutas',  value: rutas.length,                                                                       color: '#e2e8f0' },
+                { label: 'Km totales',   value: kmTotales.toLocaleString('es-MX'),                                                 color: '#818cf8' },
+                { label: 'Completadas',  value: rutas.filter(r => r.estatus === 'entregada' || r.estatus === 'cerrada').length,     color: '#34d399' },
+                { label: 'En tránsito',  value: rutas.filter(r => r.estatus === 'en_transito' || r.estatus === 'embarcada').length, color: '#fbbf24' },
               ].map(s => (
                 <div key={s.label} style={{ background: '#1a1e2e', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10, padding: '12px 14px' }}>
                   <div style={{ fontSize: 10, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>{s.label}</div>
@@ -118,5 +129,49 @@ export default function DetalleUnidadPage() {
             </div>
           </div>
 
-          {/* Historial */}
-          <div style={{ background: '#131620', border: '1px solid rgba(255,255,255,0.06)', borderR
+          <div style={{ background: '#131620', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: 20 }}>
+            <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, color: '#e2e8f0', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+              Historial de rutas ({rutas.length})
+            </div>
+            {rutas.length === 0 ? (
+              <div style={{ textAlign: 'center', color: '#64748b', padding: 32, fontSize: 12 }}>
+                Esta unidad no tiene rutas asignadas aún
+              </div>
+            ) : (
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                    {['Folio', 'Ruta', 'Fecha', 'Km', 'Estatus'].map(h => (
+                      <th key={h} style={{ padding: '8px 12px', textAlign: 'left', fontSize: 10, fontWeight: 600, color: '#64748b', letterSpacing: '.06em', textTransform: 'uppercase' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {rutas.map(r => {
+                    const er = ESTATUS_RUTA[r.estatus] || { label: r.estatus, color: '#64748b' }
+                    return (
+                      <tr key={r.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer' }}
+                        onClick={() => router.push(`/rutas/${r.id}`)}>
+                        <td style={{ padding: '10px 12px', fontFamily: 'Syne, sans-serif', fontSize: 11, color: '#818cf8', fontWeight: 600 }}>{r.folio}</td>
+                        <td style={{ padding: '10px 12px', fontSize: 13, fontWeight: 500, color: '#e2e8f0' }}>{r.nombre}</td>
+                        <td style={{ padding: '10px 12px', fontSize: 12, color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                          {r.fecha_salida ? new Date(r.fecha_salida).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
+                        </td>
+                        <td style={{ padding: '10px 12px', fontSize: 12, color: '#94a3b8' }}>
+                          {r.km_estimados ? `${r.km_estimados} km` : '—'}
+                        </td>
+                        <td style={{ padding: '10px 12px' }}>
+                          <span style={{ fontSize: 11, fontWeight: 600, color: er.color }}>{er.label}</span>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
